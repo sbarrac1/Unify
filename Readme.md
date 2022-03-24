@@ -1,5 +1,5 @@
 # Unify
-Unify helps to make using multiple computers easier by Unify is a software KVM solution that allows one mouse and keyboard to be used across multiple devices. It also creates a global clipboard that is syncronized across clients, meaning files, text and images can be transferred by simple copying and pasting between them.
+Unify is a software KVM solution that allows one mouse and keyboard to be used across multiple devices. It also creates a global clipboard that is syncronized across clients, meaning files, text and images can be transferred by simple copying and pasting between them.
 
 # Current features
 - Switch input to another client by simply moving the cursor to the edge of the screen

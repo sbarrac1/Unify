@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "environmentVariables": {},
+      "distributionName": ""
+    },
+    "Server": {
+      "commandName": "Project",
+      "commandLineArgs": "server 1234"
+    },
+    "Client localhost": {
+      "commandName": "Project",
+      "commandLineArgs": "client 127.0.0.1:1234 Debugger"
+    }
+  }
+}

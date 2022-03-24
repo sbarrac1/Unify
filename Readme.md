@@ -55,6 +55,11 @@ The client can be ran with the command 'Unify.Cli client 127.0.0.1:1234 Laptop',
 # Demo
 ## Copying text
 
-
+https://user-images.githubusercontent.com/46637437/159817506-108049ac-4e38-4649-8338-5d5f56626b6a.mp4
 
 ## Copying files
+
+
+
+https://user-images.githubusercontent.com/46637437/159817523-1e21a834-3ac9-478e-99fa-fd24f62d43a0.mp4
+

@@ -52,6 +52,13 @@ To allow a client to connect, the config file must specify that the station is e
 
 The client can be ran with the command 'Unify.Cli client 127.0.0.1:1234 Laptop', where 'Laptop' is the name of the client.
 
+### Roadmap
+
+- Run as windows service to allow access to secure desktop, and allow simulating alt+ctrl+del
+- Optimize file read requests
+- Improve multi monitor support
+- Linux support
+
 # Demo
 ## Copying text
 

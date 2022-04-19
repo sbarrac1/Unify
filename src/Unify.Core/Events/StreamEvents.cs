@@ -1,4 +1,5 @@
 ﻿using ProtoBuf;
+using System.Buffers;
 using Unify.Core.Net.Formatting;
 
 namespace Unify.Core.Events;
@@ -19,8 +20,8 @@ public sealed class StreamReadReply : IEvent
 {
     public Guid EventId { get; set; }
 
-    //Todo - this is really inefficient
-    public byte[] Data { get; init; }
+    public int BIn { get; init; }
+    public IMemoryOwner<byte> Memory { get; init; }
 }
 
 [ProtoContract(ImplicitFields = ImplicitFields.AllFields)]

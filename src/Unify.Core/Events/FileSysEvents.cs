@@ -20,7 +20,9 @@ public sealed class FileSysGetEntriesRequest : IRequest<FileSysGetEntriesReply>
 public sealed class FileSysGetEntriesReply : IEvent
 {
     public Guid EventId { get; set; }
-    public IFileSysEntry[] Entries { get; init; }
+
+    public FileSysFileEntry[] FileEntries { get; init; }
+    public FileSysDirectoryEntry[] DirectoryEntries { get; init; }
 }
 
 [ProtoContract(ImplicitFields = ImplicitFields.AllFields)]

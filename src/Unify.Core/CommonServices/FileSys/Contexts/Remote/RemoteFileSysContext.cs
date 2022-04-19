@@ -22,11 +22,21 @@ public sealed class RemoteFileSysContext : IFileSysContext
 
     public IEnumerable<IFileSysEntry> GetSubEntries(FileSysDirectoryEntry fileSysDirectory)
     {
-        return _eventTarget.SendRequest(new FileSysGetEntriesRequest()
+        var reply = _eventTarget.SendRequest(new FileSysGetEntriesRequest()
         {
             Directory = fileSysDirectory,
             ContextId = _contextId
-        }).Entries;
+        });
+
+        List<IFileSysEntry> entries = new();
+
+        if(reply.DirectoryEntries != null)
+            entries.AddRange(reply.DirectoryEntries);
+        
+        if(reply.FileEntries != null)
+            entries.AddRange(reply.FileEntries);
+
+        return entries;
     }
 
     public Stream GetFileStream(FileSysFileEntry fileEntry)
@@ -54,8 +64,6 @@ public sealed class RemoteFileSysContext : IFileSysContext
         {
             handle.Dispose();
         }
-
-
     }
 
 

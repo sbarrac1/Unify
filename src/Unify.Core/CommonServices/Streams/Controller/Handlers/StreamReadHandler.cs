@@ -1,4 +1,5 @@
-﻿using Unify.Core.Common;
+﻿using System.Buffers;
+using Unify.Core.Common;
 using Unify.Core.Events;
 
 namespace Unify.Core.CommonServices.Streams.Controller.Handlers;
@@ -28,27 +29,27 @@ public sealed class StreamReadHandler : IRequestHandler<StreamReadRequest, Strea
             ValidateRequest(request, stream);
             stream.Seek(request.StartPosition, SeekOrigin.Begin);
 
-            byte[] buffer = new byte[request.BytesToRead];
-            int bIn = stream.Read(buffer, 0, buffer.Length);
+            IMemoryOwner<byte> memory = MemoryPool<byte>.Shared.Rent(request.BytesToRead);
 
-            if (_logger.IsTraceEnabled)
-                _logger.Trace($"Read {bIn} bytes from stream {request.StreamId}");
-
-            return new StreamReadReply
+            try
             {
-                Data = EnsureBufferSize(buffer, bIn)
-            };
+                int bIn = stream.Read(memory.Memory.Span);
+
+                if (_logger.IsTraceEnabled)
+                    _logger.Trace($"Read {bIn} bytes from stream {request.StreamId}");
+
+                return new StreamReadReply
+                {
+                    BIn = bIn,
+                    Memory = memory
+                };
+            }
+            catch (Exception)
+            {
+                memory.Dispose();
+                throw;
+            }
         }
-    }
-
-    private byte[] EnsureBufferSize(byte[] buffer, int bIn)
-    {
-        if(buffer.Length == bIn)
-            return buffer;
-
-        byte[] resized = new byte[bIn];
-        Buffer.BlockCopy(buffer, 0, resized, 0, bIn);
-        return resized;
     }
 
     private void ValidateRequest(StreamReadRequest request, Stream stream)

@@ -9,23 +9,23 @@ namespace Unify.Core.Net.IO;
 /// </summary>
 public sealed class LocalEventStream : IEventStream
 {
-    private readonly BlockingCollection<EventWrapper> _input;
-    private readonly BlockingCollection<EventWrapper> _output;
+    private readonly BlockingCollection<IEvent> _input;
+    private readonly BlockingCollection<IEvent> _output;
     private readonly object _sharedLock;
     private readonly CancellationTokenSource _disposeCts;
 
     public static (IEventStream, IEventStream) CreatePair()
     {
-        BlockingCollection<EventWrapper> a = new();
-        BlockingCollection<EventWrapper> b = new();
+        BlockingCollection<IEvent> a = new();
+        BlockingCollection<IEvent> b = new();
         var lockObject = new object();
         var cts = new CancellationTokenSource();
 
         return (new LocalEventStream(a, b, lockObject, cts), new LocalEventStream(b, a, lockObject, cts));
     }
 
-    public LocalEventStream(BlockingCollection<EventWrapper> input, 
-        BlockingCollection<EventWrapper> output,
+    public LocalEventStream(BlockingCollection<IEvent> input, 
+        BlockingCollection<IEvent> output,
         object sharedLock,
         CancellationTokenSource disposeCts)
     {
@@ -35,18 +35,18 @@ public sealed class LocalEventStream : IEventStream
         _disposeCts = disposeCts;
     }
     
-    public void WriteEvent(EventWrapper wrapper)
+    public void WriteEvent(IEvent @event)
     {
         lock (_sharedLock)
         {
             if (_disposeCts.IsCancellationRequested)
                 throw new IOException("Stream closed");
     
-            _output.Add(wrapper);
+            _output.Add(@event);
         }
     }
 
-    public EventWrapper ReadEvent()
+    public IEvent ReadEvent()
     {
         lock (_sharedLock)
         {
@@ -64,19 +64,19 @@ public sealed class LocalEventStream : IEventStream
         }
     }
 
-    public Task WriteEventAsync(EventWrapper wrapper, CancellationToken ct = default)
+    public ValueTask WriteEventAsync(IEvent @event, CancellationToken ct = default)
     {
         lock (_sharedLock)
         {
             if (_disposeCts.IsCancellationRequested)
                 throw new IOException("Stream closed");
     
-            _output.Add(wrapper);
-            return Task.CompletedTask;
+            _output.Add(@event);
+            return ValueTask.CompletedTask;
         }
     }
 
-    public Task<EventWrapper> ReadEventAsync(CancellationToken ct = default)
+    public ValueTask<IEvent> ReadEventAsync(CancellationToken ct = default)
     {
         lock (_sharedLock)
         {
@@ -86,7 +86,7 @@ public sealed class LocalEventStream : IEventStream
         
         try
         {
-            return Task.FromResult(_input.Take(_disposeCts.Token));
+            return ValueTask.FromResult(_input.Take(_disposeCts.Token));
         }
         catch (Exception)
         {

@@ -2,31 +2,39 @@
 
 namespace Unify.Core.Events;
 
+//Netevents - 100-199
+//ClipboardEvents - 200-299
+//FileSysEvents - 300-399
+//InputEvents - 400-499
+//NetEvents - 500-599
+//StreamEvents - 600-699
+//IInput objects - 700-799
+
 /// <summary>
 /// Marker class for events
 /// </summary>
 [ProtoContract]
-[ProtoInclude(1, typeof(IRequest))]
-[ProtoInclude(2, typeof(RequestFailedEvent))]
-[ProtoInclude(3, typeof(ClipboardChangedEvent))]
-[ProtoInclude(4, typeof(ClipboardGetFormatsReply))]
-[ProtoInclude(5, typeof(ClipboardGetTextReply))]
-[ProtoInclude(6, typeof(ClipboardTakeOwnershipCommand))]
-[ProtoInclude(7, typeof(ClientHandshakeEvent))]
-[ProtoInclude(8, typeof(ServerAcceptedHandshakeEvent))]
-[ProtoInclude(9, typeof(ServerDeclineHandshakeEvent))]
-[ProtoInclude(10, typeof(StreamDisposeEvent))]
-[ProtoInclude(11, typeof(StreamReadReply))]
-[ProtoInclude(12, typeof(FileSysGetEntriesReply))]
-[ProtoInclude(13, typeof(FileSysGetFileStreamReply))]
-[ProtoInclude(14, typeof(FileSysCloseContextCommand))]
-[ProtoInclude(15, typeof(ClipboardGetFilesReply))]
-[ProtoInclude(16, typeof(SendInputCommand))]
-[ProtoInclude(17, typeof(SideHitEvent))]
-
+[ProtoInclude(5, typeof(IRequest))]
+[ProtoInclude(6, typeof(RequestFailedEvent))]
+[ProtoInclude(7, typeof(ClipboardChangedEvent))]
+[ProtoInclude(8, typeof(ClipboardGetFormatsReply))]
+[ProtoInclude(9, typeof(ClipboardGetTextReply))]
+[ProtoInclude(10, typeof(ClipboardTakeOwnershipCommand))]
+[ProtoInclude(11, typeof(ClientHandshakeEvent))]
+[ProtoInclude(12, typeof(ServerAcceptedHandshakeEvent))]
+[ProtoInclude(13, typeof(ServerDeclineHandshakeEvent))]
+[ProtoInclude(14, typeof(StreamDisposeEvent))]
+[ProtoInclude(15, typeof(StreamReadReply))]
+[ProtoInclude(16, typeof(FileSysGetEntriesReply))]
+[ProtoInclude(17, typeof(FileSysGetFileStreamReply))]
+[ProtoInclude(18, typeof(FileSysCloseContextCommand))]
+[ProtoInclude(19, typeof(ClipboardGetFilesReply))]
+[ProtoInclude(20, typeof(SendInputCommand))]
+[ProtoInclude(21, typeof(SideHitEvent))]
 public interface IEvent
 {
 
+    Guid EventId { get; set; }
 }
 
 /// <summary>
@@ -52,17 +60,4 @@ public interface IRequest : IEvent
 public interface IRequest<TReply> : IRequest
 {
 
-}
-
-/// <summary>
-/// Wraps an event and an event ID into one object
-/// </summary>
-[ProtoContract]
-public struct EventWrapper
-{
-    [ProtoMember(1)]
-    public Guid EventId { get; init; }
-
-    [ProtoMember(2)]
-    public IEvent Event { get; init; }
 }

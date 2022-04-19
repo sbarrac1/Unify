@@ -1,7 +1,9 @@
 ﻿using System.Buffers.Binary;
+using System.Net;
 using Nerdbank.Streams;
 using ProtoBuf;
 using Unify.Core.Events;
+using Unify.Core.Net.Formatting;
 
 namespace Unify.Core.Net.IO;
 
@@ -11,6 +13,9 @@ namespace Unify.Core.Net.IO;
 public sealed class ProtoEventStream : IEventStream
 {
     private readonly Stream _stream;
+
+    private readonly MemoryStream _writeBuffer = new();
+    private readonly MemoryStream _readBuffer = new();
 
     /// <summary>
     /// Creates a pair of ProtoEventStreams that emulate two TCP connections
@@ -26,23 +31,30 @@ public sealed class ProtoEventStream : IEventStream
     public ProtoEventStream(Stream stream)
     {
         _stream = stream;
+
+        ObjectManager.Instance.Setup();
     }
 
-    public void WriteEvent(EventWrapper wrapper)
+    public void WriteEvent(IEvent @event)
     {
-        Serializer.SerializeWithLengthPrefix(_stream, wrapper, PrefixStyle.Fixed32);
+        _writeBuffer.Position = 0;
+        ObjectManager.Instance.GetWriter(@event.GetType())(_writeBuffer, @event);
+
+        int objectLength = (int)_writeBuffer.Position;
+        Span<byte> buffer = stackalloc byte[objectLength];
+        _writeBuffer.Position = 0;
+        _writeBuffer.Read(buffer);
+
+        _stream.Write(buffer);
     }
 
-    public EventWrapper ReadEvent()
+    public IEvent ReadEvent()
     {
         try
         {
-            var next = Serializer.DeserializeWithLengthPrefix<EventWrapper>(_stream, PrefixStyle.Fixed32);
+            var prefix = ObjectPrefix.Read(_stream);
 
-            if (next.Event == null)
-                throw new IOException("End of stream");
-
-            return next;
+            return (IEvent)ObjectManager.Instance.GetReader(prefix.ObjectId)(_stream, prefix);
         }
         catch (NullReferenceException)
         {
@@ -50,40 +62,37 @@ public sealed class ProtoEventStream : IEventStream
         }
     }
 
-    public Task WriteEventAsync(EventWrapper wrapper, CancellationToken ct = default)
+    public ValueTask WriteEventAsync(IEvent @event, CancellationToken ct = default)
     {
-        using (MemoryStream ms = new MemoryStream())
+        using(MemoryStream ms = new MemoryStream())
         {
-            Serializer.SerializeWithLengthPrefix(ms, wrapper, PrefixStyle.Fixed32);
+            ObjectManager.Instance.GetWriter(@event.GetType())(ms, @event);
+
+            int objectLength = (int)ms.Position;
+            byte[] buffer = new byte[objectLength];
             ms.Position = 0;
-            return ms.CopyToAsync(_stream, ct);
+            ms.Read(buffer);
+
+            return _stream.WriteAsync(buffer, ct);
         }
     }
 
-    public async Task<EventWrapper> ReadEventAsync(CancellationToken ct = default)
+    public async ValueTask<IEvent> ReadEventAsync(CancellationToken ct = default)
     {
-        byte[] prefixBuffer = new byte[4];
-        await _stream.ReadExactAsync(prefixBuffer, 4, ct);
-        int prefix = BinaryPrimitives.ReadInt32LittleEndian(prefixBuffer);
+        var prefix = ObjectPrefix.Read(_stream);
 
-        if (prefix > 300 * 1024)
-            throw new IOException("Invalid prefix size");
-            
-        byte[] buffer = new byte[prefix];
-        await _stream.ReadExactAsync(buffer, prefix, ct);
+        byte[] buffer = new byte[prefix.ObjectLength];
 
-        using (MemoryStream ms = new MemoryStream(buffer))
+        await _stream.ReadExactAsync(buffer, prefix.ObjectLength, ct);
+
+        using(var ms = new MemoryStream(buffer))
         {
+            ms.Write(buffer);
             ms.Position = 0;
-            var next = Serializer.Deserialize<EventWrapper>(ms, length: prefix);
-
-            if (next.Event == null)
-                throw new IOException("End of stream");
-
-            return next;
+            return (IEvent)ObjectManager.Instance.GetReader(prefix.ObjectId)(ms, prefix);
         }
     }
-    
+
     public void Dispose()
     {
         _stream.Dispose();

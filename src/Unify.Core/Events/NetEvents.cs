@@ -1,31 +1,37 @@
 ﻿using ProtoBuf;
+using Unify.Core.Net.Formatting;
 using Unify.Core.Net.Handshake;
 
 namespace Unify.Core.Events;
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(500)]
 public sealed class RequestFailedEvent : IEvent
 {
-    [ProtoMember(1)]
+    public Guid EventId { get; set; }
     public string Reason { get; init; }
 }
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(501)]
 public sealed class ClientHandshakeEvent : IEvent
 {
-    [ProtoMember(1)]
+    public Guid EventId { get; set; }
     public ClientInfo Info { get; init; }
 }
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(502)]
 public sealed class ServerAcceptedHandshakeEvent : IEvent
 {
-    
+    public Guid EventId { get; set; }
 }
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(503)]
 public sealed class ServerDeclineHandshakeEvent : IEvent
 {
-    [ProtoMember(1)]
+    public Guid EventId { get; set; }
+
     public string Reason { get; init; }
 }

@@ -9,23 +9,20 @@ public sealed class ClientHandshakeRunner : IClientHandshakeRunner
     {
         try
         {
-            await eventStream.WriteEventAsync(new EventWrapper()
+            await eventStream.WriteEventAsync(new ClientHandshakeEvent()
             {
-                Event = new ClientHandshakeEvent()
-                {
-                    Info = clientInfo
-                }
-            }, ct);
+                Info = clientInfo
+            });
 
             var reply = await eventStream.ReadEventAsync(ct);
 
-            if (reply.Event is ServerAcceptedHandshakeEvent)
+            if (reply is ServerAcceptedHandshakeEvent)
                 return;
 
-            if (reply.Event is ServerDeclineHandshakeEvent declineHandshakeEvent)
+            if (reply is ServerDeclineHandshakeEvent declineHandshakeEvent)
                 throw new IOException($"The server declined the connection: {declineHandshakeEvent.Reason}");
 
-            throw new IOException($"The server sent an invalid event {reply.Event}");
+            throw new IOException($"The server sent an invalid event {reply}");
 
         }
         catch(Exception ex)

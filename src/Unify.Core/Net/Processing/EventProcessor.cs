@@ -19,8 +19,8 @@ public sealed class EventProcessor : IEventProcessor
     private readonly IEventStream _eventStream;
     private readonly IDispatcher _dispatcher;
 
-    private BlockingCollection<EventWrapper> _processQueue;
-    private BlockingCollection<EventWrapper> _writeQueue;
+    private BlockingCollection<IEvent> _processQueue;
+    private BlockingCollection<IEvent> _writeQueue;
     private CancellationTokenSource _disposeCts;
     private readonly object _lockObject = new();
     private bool _disposed;
@@ -53,11 +53,8 @@ public sealed class EventProcessor : IEventProcessor
                 _ = Task.Run(() => InternalOnException(new IOException("Too many queued write events")));
                 return;
             }
-            
-            _writeQueue.Add(new EventWrapper()
-            {
-                Event = @event
-            });
+
+            _writeQueue.Add(@event);
         }
         catch (Exception)
         {
@@ -77,12 +74,9 @@ public sealed class EventProcessor : IEventProcessor
                     throw new IOException("The event target is closed");
                 
                 _awaiters.Add(requestId, awaiter);
-                
-                _writeQueue.Add(new EventWrapper()
-                {
-                    Event = request,
-                    EventId = requestId
-                });
+
+                request.EventId = requestId;
+                _writeQueue.Add(request);
             }
 
             try
@@ -131,7 +125,7 @@ public sealed class EventProcessor : IEventProcessor
                 {
                     if (_awaiters.TryGetValue(next.EventId, out var awaiter))
                     {
-                        awaiter.SetReply(next.Event);
+                        awaiter.SetReply(next);
                         continue;
                     }
                 }
@@ -187,10 +181,10 @@ public sealed class EventProcessor : IEventProcessor
             {
                 var next = _processQueue.Take(_disposeCts.Token);
 
-                if (next.Event is IRequest request)
+                if (next is IRequest request)
                     InternalProcessRequest(request, next.EventId);
                 else
-                    InternalProcessEvent(next.Event);
+                    InternalProcessEvent(next);
             }
         }
         catch (Exception ex)
@@ -227,12 +221,9 @@ public sealed class EventProcessor : IEventProcessor
             try
             {
                 var reply = _dispatcher.DispatchRequestUnsafe(request);
-                
-                _writeQueue.Add(new EventWrapper()
-                {
-                    Event = reply,
-                    EventId = requestId
-                });
+                reply.EventId = request.EventId;
+
+                _writeQueue.Add(reply);
             }
             catch (Exception ex)
             {
@@ -240,13 +231,11 @@ public sealed class EventProcessor : IEventProcessor
                 {
                     if (_disposed)
                         return;
-                    
-                    _writeQueue.Add(new EventWrapper()
+
+                    _writeQueue.Add(new RequestFailedEvent()
                     {
-                        Event = new RequestFailedEvent()
-                        {
-                            Reason = "The server could not handle the request"
-                        }, EventId = requestId
+                        Reason = "The server could not handle the request",
+                        EventId = requestId
                     });
                 }
                 

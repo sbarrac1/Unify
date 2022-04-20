@@ -1,7 +1,6 @@
-﻿using ProtoBuf;
+﻿namespace Unify.Core.Events;
 
-namespace Unify.Core.Events;
-
+//Event object IDs - 
 //Netevents - 100-199
 //ClipboardEvents - 200-299
 //FileSysEvents - 300-399
@@ -11,7 +10,7 @@ namespace Unify.Core.Events;
 //IInput objects - 700-799
 
 /// <summary>
-/// Marker class for events
+/// Marker class for events.
 /// </summary>
 public interface IEvent
 {

@@ -1,6 +1,13 @@
 ﻿namespace Unify.Core.Net.Formatting;
+
+/// <summary>
+/// Contains utility for reading/writing objects to/from a stream
+/// </summary>
 public interface IObjectManager
 {
+    /// <summary>
+    /// Sets up formatters and maps object types
+    /// </summary>
     void Setup();
 
     ObjectReadDelegate GetReader(int objectId);

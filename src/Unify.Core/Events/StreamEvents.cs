@@ -16,12 +16,24 @@ public sealed class StreamReadRequest : IRequest<StreamReadReply>
 
 [ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
 [Formattable(601)]
-public sealed class StreamReadReply : IEvent
+public sealed class StreamReadReply : IEvent, IDisposable
 {
     public Guid EventId { get; set; }
 
+    /// <summary>
+    /// The correct amount of bytes in <seealso cref="Memory"/>
+    /// </summary>
     public int BIn { get; init; }
+
+    /// <summary>
+    /// A handle to memory that contains the returned data
+    /// </summary>
     public IMemoryOwner<byte> Memory { get; init; }
+
+    public void Dispose()
+    {
+        Memory?.Dispose();
+    }
 }
 
 [ProtoContract(ImplicitFields = ImplicitFields.AllFields)]

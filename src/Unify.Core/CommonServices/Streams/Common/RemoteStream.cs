@@ -35,25 +35,18 @@ public sealed class RemoteStream : Stream
             if (_position == Length)
                 return 0;
 
-            var reply = _eventTarget.SendRequest(new StreamReadRequest
+            using var reply = _eventTarget.SendRequest(new StreamReadRequest
             {
                 BytesToRead = count,
                 StartPosition = _position,
                 StreamId = _header.StreamId
             });
 
-            try
-            {
-                _position += reply.BIn;
+            _position += reply.BIn;
 
-                Span<byte> bufferSpan = new Span<byte>(buffer, offset, buffer.Length - offset);
-                reply.Memory.Memory.Span.Slice(0, reply.BIn).CopyTo(bufferSpan);
-                return reply.BIn;
-            }
-            finally
-            {
-                reply.Memory.Dispose();
-            }
+            Span<byte> bufferSpan = new Span<byte>(buffer, offset, buffer.Length - offset);
+            reply.Memory.Memory.Span.Slice(0, reply.BIn).CopyTo(bufferSpan);
+            return reply.BIn;
         }
     }
 

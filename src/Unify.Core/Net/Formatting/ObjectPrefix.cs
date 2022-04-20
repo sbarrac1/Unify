@@ -3,8 +3,14 @@ using System.Diagnostics;
 
 namespace Unify.Core.Net.Formatting;
 
+/// <summary>
+/// Contains the type and length of the next object in the stream
+/// </summary>
 public readonly struct ObjectPrefix
 {
+    /// <summary>
+    /// The constant length of a <seealso cref="ObjectPrefix"/>
+    /// </summary>
     public const int Size = 6;
 
     public ObjectPrefix(short objectId, int objectLength)

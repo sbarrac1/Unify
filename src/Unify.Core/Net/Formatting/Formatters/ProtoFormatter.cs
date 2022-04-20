@@ -1,7 +1,11 @@
 ﻿using ProtoBuf;
-using System.Net.Http.Headers;
 
 namespace Unify.Core.Net.Formatting.Formatters;
+
+/// <summary>
+/// Default formatter used when no custom formatter is defined for a type
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public sealed class ProtoFormatter<T> : IFormatter<T>
 {
     public T Read(Stream stream, ObjectPrefix prefix)

@@ -1,7 +1,4 @@
-﻿using NLog.LayoutRenderers.Wrappers;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Windows.Markup;
+﻿using System.Reflection;
 using Unify.Core.Common;
 using Unify.Core.Net.Formatting.Formatters;
 

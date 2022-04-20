@@ -289,6 +289,15 @@ public sealed class EventProcessor : IEventProcessor
                 });
             }
 
+            //Call disposable on any queued disposable events
+            while (_writeQueue.TryTake(out var nextWritable))
+                if (nextWritable is IDisposable disposable)
+                    disposable.Dispose();
+
+            while (_processQueue.TryTake(out var nextProcessable))
+                if (nextProcessable is IDisposable disposable)
+                    disposable.Dispose();
+
             _awaiters.Clear();
             _eventStream.Dispose();
             

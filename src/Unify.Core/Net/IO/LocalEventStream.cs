@@ -100,13 +100,6 @@ public sealed class LocalEventStream : IEventStream
         {
             _disposeCts.Cancel();
 
-            //Call dispose on any disposable events
-            while(_input.TryTake(out var obj))
-            {
-                if (obj is IDisposable disposable)
-                    disposable.Dispose();
-            }
-
             _input.Dispose();
             _output.Dispose();
         }

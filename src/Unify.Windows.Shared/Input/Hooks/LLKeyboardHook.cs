@@ -13,11 +13,12 @@ public sealed class LLKeyboardHook : LLhookBase
         _callback = callback;
     }
 
+    private readonly User32.KBDLLHOOKSTRUCT _hookData = new();
     protected override nint OnHookEvent(int nCode, nint wParam, nint lParam)
     {
         WindowMessage message = (WindowMessage)wParam;
-        var keyboardData = Marshal.PtrToStructure<User32.KBDLLHOOKSTRUCT>(lParam);
+        Marshal.PtrToStructure<User32.KBDLLHOOKSTRUCT>(lParam, _hookData);
 
-        return _callback(message, keyboardData) ? User32.CallNextHookEx(0, nCode, wParam, lParam) : -1;
+        return _callback(message, _hookData) ? User32.CallNextHookEx(0, nCode, wParam, lParam) : -1;
     }
 }

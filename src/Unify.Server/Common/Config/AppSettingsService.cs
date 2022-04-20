@@ -66,7 +66,7 @@ public sealed class AppSettingsService : IServerSettingsService
         config.LeftStation = ConfigurationManager.AppSettings.Get($"Server.Station.{stationName}.LeftStation");
         config.RightStation = ConfigurationManager.AppSettings.Get($"Server.Station.{stationName}.RightStation");
         config.TopStation = ConfigurationManager.AppSettings.Get($"Server.Station.{stationName}.TopStation");
-        config.BottomStation = $"Server.Station.{stationName}.BottomStation";
+        config.BottomStation = ConfigurationManager.AppSettings.Get($"Server.Station.{stationName}.BottomStation");
 
         if (Hotkey.TryParse(ConfigurationManager.AppSettings.Get($"Server.Station.{stationName}.Hotkey"), out var hotkey))
             config.Hotkey = hotkey;

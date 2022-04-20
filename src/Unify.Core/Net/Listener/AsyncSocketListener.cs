@@ -41,7 +41,7 @@ public sealed class AsyncSocketListener : ISocketListener
             }
             catch (Exception ex)
             {
-                socket.Dispose();
+                socket?.Dispose();
 
                 if (_disposed)
                     break;

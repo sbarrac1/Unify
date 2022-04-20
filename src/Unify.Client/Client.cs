@@ -25,6 +25,8 @@ public sealed class Client : IClient
         _logger.Info("Connected to " + serverAddress.ToString());
 
         var protoStream = new ProtoEventStream(socket.GetStream());
+
+        _logger.Info($"Doing handshake...");
         await new ClientHandshakeRunner().DoHandshakeAsync(protoStream, new ClientInfo
         {
             StationName = stationName

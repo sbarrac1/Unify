@@ -10,9 +10,9 @@ public sealed class ServerHandshakeRunner : IServerHandshakeRunner
     {
         var next = await eventStream.ReadEventAsync(ct);
 
-        if (next.Event is ClientHandshakeEvent clientHandshakeEvent)
+        if (next is ClientHandshakeEvent clientHandshakeEvent)
             return new UnknownClient(eventStream, clientHandshakeEvent.Info);
 
-        throw new IOException($"Client sent invalid event {next.Event}");
+        throw new IOException($"Client sent invalid event {next}");
     }
 }

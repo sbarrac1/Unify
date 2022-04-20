@@ -21,10 +21,7 @@ public sealed class UnknownClient : IUnknownClient
     {
         try
         {
-            _eventStream.WriteEvent(new EventWrapper()
-            {
-                Event = new ServerAcceptedHandshakeEvent()
-            });
+            _eventStream.WriteEvent(new ServerAcceptedHandshakeEvent());
 
             return _eventStream;
         }
@@ -40,12 +37,9 @@ public sealed class UnknownClient : IUnknownClient
     {
         try
         {
-            _eventStream.WriteEvent(new EventWrapper()
+            _eventStream.WriteEvent(new ServerDeclineHandshakeEvent()
             {
-                Event = new ServerDeclineHandshakeEvent()
-                {
-                    Reason = reason
-                }
+                Reason = reason
             });
         }
         catch (Exception)

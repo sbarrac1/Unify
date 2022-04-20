@@ -1,4 +1,5 @@
-﻿using Unify.Core.Events;
+﻿using System.Buffers;
+using Unify.Core.Events;
 
 namespace Unify.Core.CommonServices.Streams.Common;
 
@@ -34,16 +35,18 @@ public sealed class RemoteStream : Stream
             if (_position == Length)
                 return 0;
 
-            var dataRead = _eventTarget.SendRequest(new StreamReadRequest
+            using var reply = _eventTarget.SendRequest(new StreamReadRequest
             {
                 BytesToRead = count,
                 StartPosition = _position,
                 StreamId = _header.StreamId
-            }).Data;
+            });
 
-            _position += dataRead.LongLength;
-            Buffer.BlockCopy(dataRead, 0, buffer, offset, dataRead.Length);
-            return dataRead.Length;
+            _position += reply.BIn;
+
+            Span<byte> bufferSpan = new Span<byte>(buffer, offset, buffer.Length - offset);
+            reply.Memory.Memory.Span.Slice(0, reply.BIn).CopyTo(bufferSpan);
+            return reply.BIn;
         }
     }
 

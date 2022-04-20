@@ -28,8 +28,6 @@ public sealed class WinStationHostFactory : IStationHostFactory
 
         try
         {
-            var hook = scope.Resolve<IInputHookController>();
-
             processor.BeginBackgroundWorker((ex) =>
             {
                 processor.Dispose();
@@ -37,6 +35,7 @@ public sealed class WinStationHostFactory : IStationHostFactory
                 onFault(ex);
             });
 
+            var hook = scope.Resolve<IInputHookController>();
             scope.Resolve<IStationClipboardController>();
         }
         catch(Exception)
@@ -45,10 +44,6 @@ public sealed class WinStationHostFactory : IStationHostFactory
             scope.Dispose();
             throw;
         }
-       
-        
-        
-        
 
         return new CallbackDisposable(() =>
         {

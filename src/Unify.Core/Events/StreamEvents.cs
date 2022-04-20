@@ -1,29 +1,46 @@
 ﻿using ProtoBuf;
+using System.Buffers;
+using Unify.Core.Net.Formatting;
 
 namespace Unify.Core.Events;
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(600)]
 public sealed class StreamReadRequest : IRequest<StreamReadReply>
 {
-    [ProtoMember(1)]
+    public Guid EventId { get; set; }
     public Guid StreamId { get; init; }
-    [ProtoMember(2)]
     public int BytesToRead { get; init; }
-    [ProtoMember(3)]
     public long StartPosition { get; init; }
 }
 
-[ProtoContract]
-public sealed class StreamReadReply : IEvent
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(601)]
+public sealed class StreamReadReply : IEvent, IDisposable
 {
-    //Todo - this is really inefficient
-    [ProtoMember(1)]
-    public byte[] Data { get; init; }
+    public Guid EventId { get; set; }
+
+    /// <summary>
+    /// The correct amount of bytes in <seealso cref="Memory"/>
+    /// </summary>
+    public int BIn { get; init; }
+
+    /// <summary>
+    /// A handle to memory that contains the returned data
+    /// </summary>
+    public IMemoryOwner<byte> Memory { get; init; }
+
+    public void Dispose()
+    {
+        Memory?.Dispose();
+    }
 }
 
-[ProtoContract]
+[ProtoContract(ImplicitFields = ImplicitFields.AllFields)]
+[Formattable(602)]
 public sealed class StreamDisposeEvent : IEvent
 {
-    [ProtoMember(1)]
+    public Guid EventId { get; set; }
+
     public Guid StreamId { get; init; }
 }

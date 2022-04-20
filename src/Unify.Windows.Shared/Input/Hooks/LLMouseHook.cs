@@ -13,11 +13,12 @@ public sealed class LLMouseHook : LLhookBase
         _callback = callback;
     }
 
+    private readonly User32.MSLLHOOKSTRUCT _hookData = new();
     protected override nint OnHookEvent(int nCode, nint wParam, nint lParam)
     {
         WindowMessage message = (WindowMessage)wParam;
-        var mouseData = Marshal.PtrToStructure<User32.MSLLHOOKSTRUCT>(lParam);
+        Marshal.PtrToStructure<User32.MSLLHOOKSTRUCT>(lParam, _hookData);
 
-        return _callback(message, mouseData) ?  User32.CallNextHookEx(0, nCode, wParam, lParam) : -1;
+        return _callback(message, _hookData) ?  User32.CallNextHookEx(0, nCode, wParam, lParam) : -1;
     }
 }

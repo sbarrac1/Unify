@@ -12,14 +12,14 @@ public interface IEventStream : IDisposable
     /// </summary>
     /// <param name="wrapper">The event to be written</param>
     /// <exception cref="IOException"></exception>
-    void WriteEvent(EventWrapper wrapper);
+    void WriteEvent(IEvent @event);
 
     /// <summary>
     /// Reads an event from the stream. Blocks until an event is received
     /// </summary>
     /// <returns></returns>
     /// <exception cref="IOException"></exception>
-    EventWrapper ReadEvent();
+    IEvent ReadEvent();
 
     /// <summary>
     /// Writes an event to the event stream, using a CancellationToken
@@ -28,13 +28,13 @@ public interface IEventStream : IDisposable
     /// <param name="wrapper">The event to write</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task WriteEventAsync(EventWrapper wrapper, CancellationToken ct = default);
-    
+    ValueTask WriteEventAsync(IEvent @event, CancellationToken ct = default);
+
     /// <summary>
     /// Reads an event to the stream, using a CancellationToken
     /// to allow cancellation
     /// </summary>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<EventWrapper> ReadEventAsync(CancellationToken ct = default);
+    ValueTask<IEvent> ReadEventAsync(CancellationToken ct = default);
 }
